@@ -43,6 +43,7 @@ button {
   background: #3f3f5a;
   color: white;
   cursor: pointer;
+  touch-action: manipulation;
 }
 
 button:hover {
