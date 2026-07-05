@@ -49,3 +49,9 @@ function calculatePercent() {
     justCalculated = true;
   }
 }
+document.querySelectorAll('button').forEach(btn => {
+  btn.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    btn.onclick();
+  }, { passive: false });
+});
