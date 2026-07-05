@@ -1,16 +1,42 @@
 let display = document.getElementById('display');
+let historyPanel = document.getElementById('historyPanel');
 let expression = '';
 let justCalculated = false;
+let history = [];
 
 function updateDisplay() {
   display.value = expression.replace(/\*/g, '×').replace(/\//g, '÷');
 }
 
+function isOperator(char) {
+  return ['+', '-', '*', '/'].includes(char);
+}
+
 function appendValue(value) {
   if (justCalculated) {
-    expression = '';
-    justCalculated = false;
+    if (isOperator(value)) {
+      justCalculated = false;
+    } else {
+      expression = '';
+      justCalculated = false;
+    }
   }
+
+  if (isOperator(value)) {
+    if (expression === '') {
+      if (value === '-') {
+        expression += value;
+      }
+      updateDisplay();
+      return;
+    }
+    if (isOperator(expression.slice(-1))) {
+      expression = expression.slice(0, -1) + value;
+      updateDisplay();
+      return;
+    }
+  }
+
   expression += value;
   updateDisplay();
 }
@@ -28,7 +54,9 @@ function deleteLast() {
 
 function calculate() {
   try {
-    expression = eval(expression).toString();
+    const result = eval(expression).toString();
+    addToHistory(expression, result);
+    expression = result;
     justCalculated = true;
     updateDisplay();
   } catch {
@@ -39,8 +67,13 @@ function calculate() {
 }
 
 function calculatePercent() {
+  if (expression === '' || isOperator(expression.slice(-1))) {
+    return;
+  }
   try {
-    expression = (eval(expression) / 100).toString();
+    const result = (eval(expression) / 100).toString();
+    addToHistory(expression + ' %', result);
+    expression = result;
     justCalculated = true;
     updateDisplay();
   } catch {
@@ -49,6 +82,35 @@ function calculatePercent() {
     justCalculated = true;
   }
 }
+
+function addToHistory(expr, result) {
+  const shown = expr.replace(/\*/g, '×').replace(/\//g, '÷');
+  history.unshift({ expr: shown, result });
+  if (history.length > 15) history.pop();
+  renderHistory();
+}
+
+function renderHistory() {
+  if (history.length === 0) {
+    historyPanel.innerHTML = '<div class="history-empty">No calculations yet</div>';
+    return;
+  }
+  historyPanel.innerHTML = history.map(item =>
+    `<div class="history-item" onclick="loadFromHistory('${item.result}')">${item.expr} = ${item.result}</div>`
+  ).join('');
+}
+
+function loadFromHistory(result) {
+  expression = result;
+  justCalculated = true;
+  updateDisplay();
+  historyPanel.classList.remove('open');
+}
+
+function toggleHistory() {
+  historyPanel.classList.toggle('open');
+}
+
 document.querySelectorAll('button').forEach(btn => {
   btn.addEventListener('touchstart', function(e) {
     e.preventDefault();
