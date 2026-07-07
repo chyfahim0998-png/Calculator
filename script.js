@@ -2,7 +2,7 @@ let display = document.getElementById('display');
 let historyPanel = document.getElementById('historyPanel');
 let expression = '';
 let justCalculated = false;
-let history = [];
+let calcHistory = [];
 
 function updateDisplay() {
   display.value = expression.replace(/\*/g, '×').replace(/\//g, '÷');
@@ -85,17 +85,17 @@ function calculatePercent() {
 
 function addToHistory(expr, result) {
   const shown = expr.replace(/\*/g, '×').replace(/\//g, '÷');
-  history.unshift({ expr: shown, result });
-  if (history.length > 15) history.pop();
+  calcHistory.unshift({ expr: shown, result });
+  if (calcHistory.length > 15) calcHistory.pop();
   renderHistory();
 }
 
 function renderHistory() {
-  if (history.length === 0) {
+  if (calcHistory.length === 0) {
     historyPanel.innerHTML = '<div class="history-empty">No calculations yet</div>';
     return;
   }
-  historyPanel.innerHTML = history.map(item =>
+  historyPanel.innerHTML = calcHistory.map(item =>
     `<div class="history-item" onclick="loadFromHistory('${item.result}')">${item.expr} = ${item.result}</div>`
   ).join('');
 }
